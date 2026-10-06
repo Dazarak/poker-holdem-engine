@@ -61,8 +61,6 @@ void Holdem::RestartGame()
                 plr.isPlayer = false; // Le joueur est éliminé du tournoi/table
                 std::cout << "[DEBUG] Player " << static_cast<int>(plr.id) 
                       << " eliminated! money: " << plr.money << std::endl;
-                std::cout << std::flush;
-                std::cin.get();
             } else {
                 activePlayersCount++;
             }

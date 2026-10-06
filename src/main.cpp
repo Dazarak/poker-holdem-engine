@@ -10,7 +10,9 @@ int main() {
     std::mt19937 gen(rd());
 
     while (!game.PartyEnded) {
+
         PlayerContext plcntx = game.GetPlayerTurnAndPossibleAction();
+        
         if (plcntx.actionsPossible[0].isAllow)
         {
             game.ExecutePossibleAction(PlayerAction{.actionIndex = 0, .amount = 0});
