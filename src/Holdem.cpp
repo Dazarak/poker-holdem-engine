@@ -57,8 +57,12 @@ void Holdem::RestartGame()
     uint8_t activePlayersCount = 0;
     for (auto& plr : Players) {
         if (plr.isPlayer) {
-            if (plr.money == 0) {
+            if (plr.money <= 0) {
                 plr.isPlayer = false; // Le joueur est éliminé du tournoi/table
+                std::cout << "[DEBUG] Player " << static_cast<int>(plr.id) 
+                      << " eliminated! money: " << plr.money << std::endl;
+                std::cout << std::flush;
+                std::cin.get();
             } else {
                 activePlayersCount++;
             }
@@ -66,9 +70,11 @@ void Holdem::RestartGame()
     }
 
     Context.nbPlayerInGame = activePlayersCount;
+    std::cout << "nombre de joueur actif : " << static_cast<int>(activePlayersCount) << std::endl;
 
     if (activePlayersCount <= 1) {
         // Fin de partie
+        PartyEnded = true;
         return;
     }
 
@@ -212,7 +218,7 @@ PlayerContext Holdem::GetPlayerTurnAndPossibleAction()
     return plrCntxt;
 }
 
-void Holdem::ExecutePossibleAction(PlayerAction& action)
+void Holdem::ExecutePossibleAction(PlayerAction action)
 {
     uint8_t pIdx = Context.currentTurn;
     Player& plr = Players[pIdx];
@@ -235,6 +241,7 @@ void Holdem::ExecutePossibleAction(PlayerAction& action)
         {
             plr.money -= needed;
             plr.currentBet += needed;
+            plr.totalBet += needed;
             Context.pot += needed;
             break;
         }
@@ -257,6 +264,7 @@ void Holdem::ExecutePossibleAction(PlayerAction& action)
         {
             plr.money -= action.amount;
             plr.currentBet += action.amount;
+            plr.totalBet += action.amount;
             Context.pot += action.amount;
 
             Context.lastBet = Context.currentBet;
@@ -270,6 +278,7 @@ void Holdem::ExecutePossibleAction(PlayerAction& action)
     {
         uint32_t allInAmount = plr.money;
         plr.currentBet += allInAmount;
+        plr.totalBet += allInAmount;
         Context.pot += allInAmount;
         plr.money = 0;
         plr.isAllIn = true;
@@ -389,7 +398,7 @@ void Holdem::DistributePot()
                 Players[i].totalBet -= amount;
 
                 // Si le joueur n'a pas fold et a un score valide
-                if (!Players[i].isFolded && Players[i].rank > 0) {
+                if (Players[i].isPlayer && !Players[i].isFolded && Players[i].rank > 0) {
                     if (Players[i].rank < bestScoreInSubPot) {
                         bestScoreInSubPot = Players[i].rank;
                     }
@@ -402,7 +411,7 @@ void Holdem::DistributePot()
         if (bestScoreInSubPot != UINT8_MAX) {
             for (uint8_t i = 0; i < Context.nbPlayer; ++i) {
                 // On vérifie qu'il avait bien participé à ce subPot (totalBet diminué au-dessus)
-                if (!Players[i].isFolded && Players[i].rank == bestScoreInSubPot) {
+                if (Players[i].isPlayer && !Players[i].isFolded && Players[i].rank == bestScoreInSubPot) {
                     winners.push_back(i);
                 }
             }
@@ -440,7 +449,10 @@ void Holdem::DistributePot()
             Context.pot = 0;
         }
     }
-
+    std::cout << "============================================" << std::endl << std::endl;
+    for (const auto& plr : Players) {
+        std::cout << "player : " << plr.id << " money : " << static_cast<unsigned int>(plr.money) << "is already player : " << static_cast<bool>(plr.isPlayer) << std::endl ; 
+    }
     Context.pot = 0;
     RestartGame();
 }
@@ -525,9 +537,9 @@ void Holdem::givePlayersScore()
         };
         HandResult HR = pokerEngine.EvaluatePlayersHands(allCards);
         plr.activecards = HR.activeCards;
-        plr.rank = HR.rank;
+        plr.handrank = HR.handRank;
     }
-    
+
     // Réinitialiser les scores (0 = foldé / hors jeu)
     for (Player& plr : Players) {
         plr.rank = 0;
