@@ -1,0 +1,3 @@
+[submodule "extern/poker-hand-evaluator"]
+	path = extern/poker-hand-evaluator
+	url = https://github.com/Dazarak/poker-hand-evaluator.git
