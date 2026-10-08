@@ -22,17 +22,18 @@ class Holdem
 {
     public:
 
-        Holdem(uint8_t nbPlayer = 9, int startMoney = 1000, uint32_t smallBlind = 50);
+        Holdem(uint8_t nbPlayer = 10, int startMoney = 1000, uint32_t smallBlind = 50);
         PlayerContext GetPlayerTurnAndPossibleAction();
-        void ExecutePossibleAction(PlayerAction& action);
+        void ExecutePossibleAction(PlayerAction action);
         uint8_t GetCurrentTurn();
+        void AdvanceToNextPlayer();
+        bool PartyEnded = false;
 
     private:
         GameContext Context;
         Engine pokerEngine;
         std::array<Player, Config::MAX_PLAYERS> Players {};
         void givePlayersScore();
-        void AdvanceToNextPlayer();   
         bool CanPlayerAct(const Player& plr) const noexcept;
         uint8_t GetActivePlayersCount() const noexcept;
         bool IsStreetComplete() const noexcept;
