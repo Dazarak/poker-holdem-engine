@@ -30,7 +30,6 @@ class Holdem
     private:
         GameContext Context;
         Engine pokerEngine;
-        std::array<Card, Config::MAX_CARDS> CommunCards {};
         std::array<Player, Config::MAX_PLAYERS> Players {};
         void givePlayersScore();
         void AdvanceToNextPlayer();   

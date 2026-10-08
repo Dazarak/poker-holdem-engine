@@ -517,6 +517,17 @@ void Holdem::AdvanceStreet()
 
 void Holdem::givePlayersScore()
 {
+    for (auto& plr : Players)
+    {
+        std::array<Card, Config::MAX_CARDS> allCards = {
+            Context.visibleCommunCards[0],Context.visibleCommunCards[1],Context.visibleCommunCards[2],Context.visibleCommunCards[3],Context.visibleCommunCards[4],
+            plr.cards[0], plr.cards[1], plr.cards[2], plr.cards[3], plr.cards[4]
+        };
+        HandResult HR = pokerEngine.EvaluatePlayersHands(allCards);
+        plr.activecards = HR.activeCards;
+        plr.rank = HR.rank;
+    }
+    
     // Réinitialiser les scores (0 = foldé / hors jeu)
     for (Player& plr : Players) {
         plr.rank = 0;
