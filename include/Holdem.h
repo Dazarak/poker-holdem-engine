@@ -23,11 +23,14 @@ class Holdem
     public:
 
         Holdem(uint8_t nbPlayer = 10, int startMoney = 1000, uint32_t smallBlind = 50);
-        PlayerContext GetPlayerTurnAndPossibleAction();
+        PlayerContext GetPlayerTurnInformations();
         void ExecutePossibleAction(PlayerAction action);
         uint8_t GetCurrentTurn();
         void AdvanceToNextPlayer();
+        uint8_t GetWinner();
+        void RestartGame();
         bool PartyEnded = false;
+        bool HandEnded = false;
 
     private:
         GameContext Context;
@@ -41,7 +44,6 @@ class Holdem
         void DistributePot();
         void AdvanceStreet();
         uint8_t GetNextActivePlayer(uint8_t startSeat);
-        void RestartGame();
 }; 
 
 #endif

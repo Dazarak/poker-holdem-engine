@@ -46,21 +46,20 @@ Holdem::Holdem(uint8_t nbPlayer, int startMoney, uint32_t smallBlind)
     Context.nbPlayerInGame = nbPlayer;
     Context.currentTurn = 0;       // Siège du joueur actif (0 à 9)
     Context.dealerPos = 0;         // Siège du bouton
-    Context.currentBet = 0;       // La mise globale à égaler
-    Context.pot = 0;              // Pot total
+    Context.currentBet = 0;        // La mise globale à égaler
+    Context.pot = 0;               // Pot total
     Context.currentStep = GameStep::PreFlop;
 }
 
 void Holdem::RestartGame()
 {
+    HandEnded = false;
     // Élimination des joueurs ruinés et comptage des joueurs actifs
     uint8_t activePlayersCount = 0;
     for (auto& plr : Players) {
         if (plr.isPlayer) {
             if (plr.money <= 0) {
                 plr.isPlayer = false; // Le joueur est éliminé du tournoi/table
-                std::cout << "[DEBUG] Player " << static_cast<int>(plr.id) 
-                      << " eliminated! money: " << plr.money << std::endl;
             } else {
                 activePlayersCount++;
             }
@@ -68,8 +67,7 @@ void Holdem::RestartGame()
     }
 
     Context.nbPlayerInGame = activePlayersCount;
-    std::cout << "nombre de joueur actif : " << static_cast<int>(activePlayersCount) << std::endl;
-
+    
     if (activePlayersCount <= 1) {
         // Fin de partie
         PartyEnded = true;
@@ -168,7 +166,7 @@ uint8_t Holdem::GetNextActivePlayer(uint8_t startSeat)
     return seat;
 }
 
-PlayerContext Holdem::GetPlayerTurnAndPossibleAction()
+PlayerContext Holdem::GetPlayerTurnInformations()
 {
     uint8_t pIdx = Context.currentTurn;
     PlayerContext plrCntxt;
@@ -452,7 +450,7 @@ void Holdem::DistributePot()
         std::cout << "player : " << plr.id << " money : " << static_cast<unsigned int>(plr.money) << "is already player : " << static_cast<bool>(plr.isPlayer) << std::endl ; 
     }
     Context.pot = 0;
-    RestartGame();
+    HandEnded = true;
 }
 
 void Holdem::AdvanceStreet()
@@ -608,4 +606,19 @@ void Holdem::givePlayersScore()
         // Le rang suivant prend en compte le nombre de joueurs ex-æquo
         currentRank += candidates.size();
     }
+}
+
+uint8_t Holdem::GetWinner()
+{
+    if (PartyEnded)
+    {
+        for (const auto& plr : Players) {
+            std::cout << "p id : " << plr.id <<std::endl;
+            if (plr.isPlayer)
+            {
+                std::cout<<"isPlayer"<<std::endl;
+            }
+        }
+    }
+    return 9;
 }
