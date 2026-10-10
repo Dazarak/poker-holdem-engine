@@ -11,7 +11,7 @@ int main() {
 
     while (!game.PartyEnded) {
 
-        PlayerContext plcntx = game.GetPlayerTurnAndPossibleAction();
+        PlayerContext plcntx = game.GetPlayerTurnInformations();
         
         if (plcntx.actionsPossible[0].isAllow)
         {
@@ -21,7 +21,13 @@ int main() {
         }
         
         game.AdvanceToNextPlayer();
+
+        if (game.HandEnded && !game.PartyEnded)
+        {
+            game.RestartGame();
+        }
     }
+    std::cout << "WINNER : " << static_cast<int>(game.GetWinner()) << std::endl;
 
     return 0;
 }
