@@ -21,6 +21,7 @@ public:
     uint8_t currentTurn;       // Siège du joueur actif (0 à 9)
     uint8_t dealerPos;         // Siège du bouton
     uint8_t nbPlayer;
+    uint32_t initialMoney;
     uint8_t nbPlayerInGame;
     uint32_t currentBet;       // La mise globale à égaler
     uint32_t lastBet;          // Mise qui précèdent la dernière mise

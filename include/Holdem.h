@@ -13,8 +13,13 @@
 #include <array>
 
 struct PlayerAction {
-    uint8_t actionIndex; // 0: Check, 1: Raise, 2: AllIn, 3: Call, 4: Fold
+    Action action;
     uint32_t amount{0};  // Montant TOTAL de la mise visée (ex: 501 pour un Raise à 501)
+};
+
+inline std::ostream& operator<<(std::ostream& os, const PlayerAction& ctx) {
+    os << ctx.action;
+    return os;
 };
 
 

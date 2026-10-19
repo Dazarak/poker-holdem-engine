@@ -44,6 +44,7 @@ Holdem::Holdem(uint8_t nbPlayer, int startMoney, uint32_t smallBlind)
     Context.bigBlind = smallBlind * 2;
     Context.nbPlayer = nbPlayer;
     Context.nbPlayerInGame = nbPlayer;
+    Context.initialMoney = startMoney;
     Context.currentTurn = 0;       // Siège du joueur actif (0 à 9)
     Context.dealerPos = 0;         // Siège du bouton
     Context.currentBet = 0;        // La mise globale à égaler
@@ -184,32 +185,32 @@ PlayerContext Holdem::GetPlayerTurnInformations()
 
     uint32_t totalFunds = Players[pIdx].money + Players[pIdx].currentBet;
 
+    // Fold
+    plrCntxt.actionsPossible[0].isAllow = true;
+
     // Check
     if (Context.currentBet == Players[pIdx].currentBet)
     {
-        plrCntxt.actionsPossible[0].isAllow = true;
+        plrCntxt.actionsPossible[1].isAllow = true;
     }
 
     // Call
     if (totalFunds >= Context.currentBet && Context.currentBet > Players[pIdx].currentBet)
     {
-        plrCntxt.actionsPossible[3].isAllow = true;
+        plrCntxt.actionsPossible[2].isAllow = true;
     }
 
     // Raise (appel direct de la méthode membre calculée)
     if (totalFunds >= Context.minBet())
     {
-        plrCntxt.actionsPossible[1].isAllow = true;
+        plrCntxt.actionsPossible[3].isAllow = true;
     }
 
     // All-In
     if (Players[pIdx].money > 0)
     {
-        plrCntxt.actionsPossible[2].isAllow = true;
+        plrCntxt.actionsPossible[4].isAllow = true;
     }
-
-    // Fold
-    plrCntxt.actionsPossible[4].isAllow = true;
 
     return plrCntxt;
 }
@@ -219,19 +220,17 @@ void Holdem::ExecutePossibleAction(PlayerAction action)
     uint8_t pIdx = Context.currentTurn;
     Player& plr = Players[pIdx];
 
-    plr.hasActed = true;
-
-    switch (action.actionIndex)
+    switch (action.action)
     {
-    case 0: // Check
+    case Action::Check: // Check
         break;
 
-    case 3: // Call
+    case Action::Call: // Call
     {
         uint32_t needed = Context.currentBet - plr.currentBet;        
         if (needed >= plr.money)
         {
-            action.actionIndex = 2; // Bascule en All-In
+            action.action = Action::AllIn; // Bascule en All-In
         }
         else
         {
@@ -244,7 +243,7 @@ void Holdem::ExecutePossibleAction(PlayerAction action)
     }
     [[fallthrough]];
 
-    case 1: // Raise
+    case Action::Raise: // Raise
     {
         uint32_t minNeeded = Context.minBet() - plr.currentBet;
         if (action.amount < minNeeded) {
@@ -254,7 +253,7 @@ void Holdem::ExecutePossibleAction(PlayerAction action)
         // Si la relance consomme tout le tapis, c'est un All-In
         if (action.amount >= plr.money)
         {
-            action.actionIndex = 2; // Bascule en All-In
+            action.action = Action::AllIn; // Bascule en All-In
         }
         else
         {
@@ -270,7 +269,7 @@ void Holdem::ExecutePossibleAction(PlayerAction action)
     }
     [[fallthrough]];
 
-    case 2: // AllIn
+    case Action::AllIn: // AllIn
     {
         uint32_t allInAmount = plr.money;
         plr.currentBet += allInAmount;
@@ -302,10 +301,12 @@ void Holdem::ExecutePossibleAction(PlayerAction action)
         break;
     }
 
-    case 4: // Fold
+    case Action::Fold: // Fold
         plr.isFolded = true;
         break;
     }
+
+    plr.hasActed = true;
 }
 
 uint8_t Holdem::GetCurrentTurn()
@@ -444,10 +445,6 @@ void Holdem::DistributePot()
         } else {
             Context.pot = 0;
         }
-    }
-    std::cout << "============================================" << std::endl << std::endl;
-    for (const auto& plr : Players) {
-        std::cout << "player : " << plr.id << " money : " << static_cast<unsigned int>(plr.money) << "is already player : " << static_cast<bool>(plr.isPlayer) << std::endl ; 
     }
     Context.pot = 0;
     HandEnded = true;
